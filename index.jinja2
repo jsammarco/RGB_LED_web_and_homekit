@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html style="width:100% !important">
+    <head>
+        <title data-bind="text: title">Sign Color</title>
+
+        <link rel="shortcut icon" href="{{ url_for('static', filename='img/tentacle-32x32.png') }}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{{ url_for('static', filename='img/apple-touch-icon-114x114.png') }}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='img/apple-touch-icon-144x144.png') }}">
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+        {% include 'stylesheets.jinja2' %}
+        <!--{____% include 'initscript.jinja2' %___}-->
+        {% include 'jquery.jinja2' %}
+        {% include 'jscolor.min.jinja2' %}
+        <script>
+	        var j, pixels = 20;
+	        $(function () {
+		       $('#setBtn').on('click', function () {
+			       var color = $('#background-color').val().replace("#", "").toString(16);
+			       color = hexToRgb(color);
+			       var colorStr = color.r+","+color.g+","+color.b;
+			       console.log("http://"+window.location.hostname+":8888/START"+colorStr+"END");
+			       $('#colorFrame').attr('src', "http://"+window.location.hostname+":8888/START"+colorStr+"END");
+		       });
+		       $('#fade_button').on('click', function () {
+			       fadeColor();
+		       });
+	        });
+	        
+	        function fadeColor() {
+				for (j=0; j<256; j+=2) {
+				    setTimeout(nextColor, 150 * j, j);
+				}
+	        }
+	        
+	        function nextColor(j) {
+			   var color = Wheel(j);
+		       console.log("http://"+window.location.hostname+":8888/START"+color[0]+","+color[1]+","+color[2]+"END");
+		       $('#colorFrame').attr('src', "http://"+window.location.hostname+":8888/START"+color[0]+","+color[1]+","+color[2]+"END");
+		    }
+	        
+	        function Wheel(WheelPos) {
+				WheelPos = 255 - WheelPos;
+				if(WheelPos < 85) {
+					return [255 - WheelPos * 3, 0, WheelPos * 3];
+				} else if(WheelPos < 170) {
+					WheelPos -= 85;
+					return [0, WheelPos * 3, 255 - WheelPos * 3];
+				} else {
+					WheelPos -= 170;
+					return [WheelPos * 3, 255 - WheelPos * 3, 0];
+				}
+			}
+	        
+	        function hexToRgb(hex) {
+			    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+			    return result ? {
+			        r: parseInt(result[1], 16),
+			        g: parseInt(result[2], 16),
+			        b: parseInt(result[3], 16)
+			    } : null;
+			}
+        </script>
+    </head>
+    <body style="width:100% !important">
+	 <div class="page-container" style="width:100% !important">
+        <div id="navbar" class="navbar navbar-static-top">
+            <div class="navbar-inner" data-bind="css: appearanceClasses">
+                <div class="container" style="width:100% !important">
+                    <a class="brand" href="#"> <span data-bind="text: appearance.brand">Sign Color</span></a>
+                   
+                </div>
+            </div>
+        </div>
+        <div class="container" style="width:100% !important">
+            <div class="row">
+                <div style="width:100%; text-align:center; font-size: 3em; margin-top:50px">
+	                <label for="background-color"><b style="font-size: 3em">Choose a sign color below:</b></label>
+	                <br />
+	                Color: <input id="background-color" class="jscolor" value="ab2567" style="font-size:20pt;" />
+	                <input style="font-size:1em; height:1.2em; margin:5px;" type="button" value="Set Color" id="setBtn" />
+	                <br />
+	                <br />
+	                <br />
+	                <br />
+	                <div>
+		                <input type="button" id="fade_button" style="font-size:1em; height:1.2em; margin:5px;" value="Start Color Fade" />
+	                </div>
+                </div>
+            </div>
+	        <iframe src="" id="colorFrame" style="border:1px solid transparent; height:1px; width:1px;" />
+	
+	        <!-- Generic plugin template files -->
+	        {% for key in templates.generic.order %}
+	            {% set data = templates.generic.entries[key] %}
+	            {% try "<!-- There was an error with the template {filename} at line number {lineno}: {exception} -->" %}{% include data.template ignore missing %}{% endtry %}
+	        {% endfor %}
+	        <!-- End of generic plugin template files -->
+	
+        </div>
+    </body>
+</html>
